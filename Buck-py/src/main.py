@@ -9,7 +9,7 @@ import firebase_admin
 from firebase_admin import credentials,firestore
 # print(os.getcwd())
 
-cred = credentials.Certificate("buck-py/src/serviceAccountKey.json")
+cred = credentials.Certificate("buck-py/serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 
 with importlib.resources.path("src","data.json") as haar_resource:

@@ -1,4 +1,4 @@
-from setuptools import setup,find_packages
+from setuptools import setup, find_packages
 
 
 setup (
@@ -7,7 +7,7 @@ setup (
   description = ' Get started with your projects faster .',
   url = 'https://github.com/Pleasant-tech/Buck/',
   keywords='productivity, setuptools, bucket, cli, buck, getbuck',
-  long_description = "Run multiple commands all in one."
+  long_description = "Run multiple commands all in one.",
   #package_dir={'': 'src'},
   packages = find_packages(),
   include_package_data = True,
