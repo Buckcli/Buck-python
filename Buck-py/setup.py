@@ -11,6 +11,9 @@ setup (
   #package_dir={'': 'src'},
   packages = find_packages(),
   include_package_data = True,
+  install_requires=[
+    'firebase-admin',
+  ],
  
  
   license="MIT",
@@ -30,5 +33,6 @@ setup (
   zip_safe=False,
   author = 'Pleasant Tech',
   author_email = 'pleasanttech21@gmail.com'
+
   
 )
