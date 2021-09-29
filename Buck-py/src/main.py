@@ -8,8 +8,9 @@ import importlib.resources
 import firebase_admin
 from firebase_admin import credentials,firestore
 
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
+with importlib.resources.path("src","serviceAccountKey.json") as fire_resource:
+  cred = credentials.Certificate(fire_resource)
+  firebase_admin.initialize_app(cred)
 
 with importlib.resources.path("src","main.py") as haar_resource:
     

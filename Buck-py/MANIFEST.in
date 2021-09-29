@@ -1,1 +1,1 @@
-include data.json
+include serviceAccountKey/*.json
