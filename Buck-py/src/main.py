@@ -2,20 +2,19 @@ import sys
 import json 
 import os
 import shlex 
-
+import pprint
 import importlib.resources
 
 import firebase_admin
 from firebase_admin import credentials,firestore
-# print(os.getcwd())
 
-cred = credentials.Certificate("buck-py/serviceAccountKey.json")
+cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 
-with importlib.resources.path("src","data.json") as haar_resource:
+with importlib.resources.path("src","main.py") as haar_resource:
     
   file = os.path.abspath(haar_resource)
-  file = file[:-18]
+  file = file[:-11]
   file = file + "buck-data/"
   
   if os.path.isdir(file):
@@ -27,7 +26,6 @@ with importlib.resources.path("src","data.json") as haar_resource:
     f = open(data,"a+")
     
     
-  
 # Creates the Bucket class 
 class Bucket: 
   def __init__(self,name,executor,commandList,description):
@@ -35,88 +33,140 @@ class Bucket:
     self.executor = executor
     self.commandList = commandList
     self.description = description
+  def __str__(self):
+    return "{} {} {} {} {}". format(self.name, self.executor,self.commandList,self.description, self.count)
 
 
-  # Creates a New Bucket
+# Interacts with local db
+def middleMan(arg,data): 
+  try :
+    #Fetches data from data file 
+    with importlib.resources.path("src","main.py") as haar_resource:
+      
+      file = os.path.abspath(haar_resource)
+      file = file[:-11]
+      dataFilePath = file + "buck-data/data.json"
+      
+      if arg == "r":
+        with open (dataFilePath, 'r') as f:
+          data = f.read()
+          f.close()
+          
+        return data
+      
+      elif arg == "a":
+        data = json.dumps(data)
+        with open(dataFilePath,"a") as f: 
+          data = '\n'+data+', \n'
+          f.write(data)
+          f.close()
+
+      elif arg == "w":
+        data = json.dumps(data)
+
+        with open(dataFilePath,"w") as f: 
+          data = '\n'+data+', \n'
+          f.write(data)
+          f.close()
+  
+      else: 
+        return dataFilePath
+
+  except FileNotFoundError:
+    print(">> Cannot locate data file :  " + dataFilePath )
+  except Exception as e:
+    print (">> Error")
+
+# Creates a New Bucket
 def createBucket():
-   
-  print(' >> Howdy! Create A New Bucket ')
-  name = input("\n Name : ")
-  print ('\n >> Seperate commands with a comma')
-  preCmds = input (" Commands : ")
-  
-  cmds = preCmds.split(',')
-  executor = str(input("\n Executor : ")) 
-  detail = str(input("""\n Description : """))
-  data = Bucket(name,executor,cmds,detail)
-  
-  # Load data object into a new object (spaghetti code❗)
-  newData = {
-    "name": data.name,
-    "executor":data.executor,
-    "buck_list":data.commandList,
-    "description":data.description
-  }
-  final = json.dumps(newData)
-  
-  with importlib.resources.path("src","data.json") as haar_resource:
+  try :
+    print(' >> Howdy! Create A New Bucket ')
+    name = input("\n Name : ")
+    print ('\n >> Seperate commands with a comma')
+    preCmds = input (" Commands : ")
     
-    file = os.path.abspath(haar_resource)
-    file = file[:-18]
-    file = file + "buck-data/data.json"
-   
-   # Write Json to a Json Data Fi
-  
-  with open(file,"a") as f: 
-    other= '\n'+final+', \n'
-    f.write(other)
-    f.close()
+    cmds = preCmds.split(',')
+    executor = str(input("\n Executor : ")) 
+    detail = str(input("""\n Description : """))
+    data = Bucket(name,executor,cmds,detail)
+    
+    # Load data object into a new object (spaghetti code❗)
+    newData = {
+      "name": data.name,
+      "executor":data.executor,
+      "buck_list":data.commandList,
+      "description":data.description
+    }
+    
+    middleMan("a",newData)
 
-   # Sucess Message
-  print('\n >> yay! it is done ')
-  print (f"\n >> Try it out 'buck {data.executor}' ")
-  
-    # End Process
-  sys.exit()
-    
-#List out buckets
+    # Sucess Message
+    print('\n >> yay! it is done ')
+
+    # terrible code that needs to be fixed.
+    score = 0
+    for i in data.commandList:
+     
+      if "$"  in i :
+        score += 10000
+      if "$" not in i :
+        score -= 10
+      if score > 1000:
+        print (f"\n >> Usage : 'buck {data.executor} [extra argument]' ")
+        break
+      elif score < 1000:
+        print (f"\n >> Usage : 'buck {data.executor}' ")
+
+  except KeyboardInterrupt:
+    print("\n >> KeyboardInterrupt :  Process terminated !") 
+
+
+#List out bucketsq
 def listBucket(arg):
   
-  if len(arg) > 2 :
-    with importlib.resources.path("src","data.json") as haar_resource:
-      file = os.path.abspath(haar_resource)
-      file = file[:-18]
-      file = file + "buck-data/data.json"
-   
-     
-      with open (file , 'r') as f:
-        fileData = f.read()
-        f.close()
-      Datta = fileData[:-3]
-      otherData = '{ "bucket" : [' + Datta + '] } '
-      data = json.loads(otherData)
+  if len(arg) > 2:
+  
+    # fetch data from middleMan()
+    data = middleMan("r","")
 
-      for i in data['bucket']:
-        response = i.get('executor')
-        if arg[2] in response: 
-          print (' >> Here you go : \n')
-          print(json.dumps(i,indent=2))
+    if data[-4] == ",":
+      print(data)
+      data = data[:-4]
+    else:
+      data = data[:-3]
+  
+    otherData = '{ "bucket" : [' + data + ' ] } '
+
+    data = json.loads(otherData)
+    data = data['bucket']
+    
+    # Logic
+    for i in data:
+  
+      response = i.get('name')
+
+    if arg[2] in response:
+      if i:
+        print (' >> Here you go : \n')
+        print(json.dumps(i,indent=2))
+      else:
+        print(">> no data")
 
   else:
-    with importlib.resources.path("src","data.json") as haar_resource:
-      file = os.path.abspath(haar_resource)
-      file = file[:-18]
-      file = file + "buck-data/data.json"
-   
-   
-    with open (file , 'r') as f:
-      data = f.read()
-      f.close()
-
-    otherData = '{ "bucket" : [' + data + '{} ] } '
-    jsonData = json.loads(otherData)
-    print (' >> Here you go : \n')
-    print(json.dumps(jsonData,indent=2))
+    # fetch data from middleMan()
+    data = middleMan("r","")
+    if data:
+      modifiedData = '{ "bucket" : [' + data + '{} ] } '
+  
+      #Coverts Data To Json
+      jsonData = json.loads(modifiedData)
+  
+      # Renders Data 
+      print (' >> Here you go : \n')
+  
+      print(json.dumps(jsonData,indent=2))
+    else:
+      print(">> no data")
   
 
 # Check if command is cd
@@ -138,42 +188,24 @@ def run_command(command: str) -> int:
 #Run Commands From Bucket
 def run(arg):
   
-  # Fetch Data
- 
-  with importlib.resources.path('src','data.json') as haar_resource:
-    
-    file = os.path.abspath(haar_resource)
-    file = file[:-18]
-    file = file + "buck-data/data.json"
+ # Fetch Data from middleMan()
+  data = middleMan("r","")
+  data = data[:-3]
   
-  with open (file,'r') as f:
-    preData = f.read()
-    f.close()
-    
-    
+  otherData = '{ "bucket" : [' + data + '] } '
   
-  
-  
-  # Modify Data
-  Datta = preData[:-3]
-  otherData = '{ "bucket" : [' + Datta + '] } '
-  
- # Coverts modified data to json
+  # Coverts modified data to json
   data = json.loads(otherData)
-  
   
   
   # Logic
   for i in data['bucket']:
     response = i.get('executor')
-    
-    
-    
+
     if arg[1] in response:
       
       buck = i.get('buck_list')
-       
-      
+
       if len(arg) > 2 :
         for i in buck:
           #  print (cmd)
@@ -205,31 +237,26 @@ def run(arg):
           run_command(i)
         
         if len(buck) == 1 :
-          print('>> Done! executed 1 command.')
+          print('\n >> Done! executed 1 command.')
         else:
-          print('>> Done! executed '+ str(len(buck)) + ' commands.')
+          print('\n >> Done! executed '+ str(len(buck)) + ' commands.')
           
 def eraseBucket():
-  ans = input('\n >> This would wipe out your bucket data ! ,should i proceed ? "y" or "n" : ' )
+  ans = input('\n>> This would wipe out your bucket data ! , "y" or "n" : ' )
   if ans == "y" or ans == "Y":
-    with importlib.resources.path("src","data.json") as haar_resource:
-    
-      file = os.path.abspath(haar_resource)
-      file = file[:-18]
-      file = file + "buck-data/data.json"
-   
+    file = middleMan("","")
     # Write Json to a Json Data Fi
     with open(file,"w") as f: 
       f.write("")
       f.close()
     # Sucess Message
-    print('\n >> Your bucket is now empty.  ')
+    print('\n>> Your bucket is now empty.  ')
     # End Process
     sys.exit()
   elif ans == "n" or ans == "N":
-    print("\n >> Process Terminated...")
+    print("\n>> Process Terminated...")
   else:
-    print("\n >> You did not enter a valid input, try again !")
+    print("\n>> error :  You did not enter a valid input, try again !")
     sys.exit()
 
 #Add bucket from cloud
@@ -256,30 +283,81 @@ def addBucket(arg):
         "description":description
       }
       
-      # Coverts object to Json 
-      final = json.dumps(newData)
-
-      with importlib.resources.path("src","data.json") as haar_resource:
-        file = os.path.abspath(haar_resource)
-        file = file[:-18]
-        file = file + "buck-data/data.json"
-
-      with open(file,"a") as f: 
-        other= '\n'+ final +', \n'
-        f.write(other)
-        f.close()
-
+      middleMan("a",newData)
 
       print(' >> yay! it is done ')
-      print (f"\n >> Try it out 'buck {executor}' ")
-
-      sys.exit()
-      print(newData)
-    else:
+      score = 0
+      for i in commandList:
+       
+        if "$"  in i :
+          score += 10000
+        if "$" not in i :
+          score -= 10
+        if score > 1000:
+          print (f"\n >> Usage : 'buck {executor} [extra argument]' ")
+          break
+        elif score < 1000:
+          print (f"\n >> Usage : 'buck {executor}' ")
+ 
+    elif res == None:
       print(" >> No bucket - " + arg[2] + " :(")
+
+    # End Process
+    sys.exit()
 
   except Exception as e:
     print(" >> Oops! :( An error occured")
+
+# deletes a bucket 
+def deleteBucket(arg):
+  if len(arg) > 2:
+    # fetch data from middleMan()
+    data = middleMan("r","")
+    data = data[:-3]
+  
+    otherData = '{ "bucket" : [' + data + '] } '
+  
+    # Coverts modified data to json
+    data = json.loads(otherData)
+    data = data['bucket']
+    #Logic
+    try:
+      
+      for i in range(len(data)):
+        response = data[i].get('executor')
+      
+         
+        if arg[2] == response: 
+          
+          ans = input('\n>> This would delete bucket "' + arg[2] + '" ! , "y" or "n" : ' )
+          if ans == "y" or ans == "Y":
+            
+            # Write new Json to a Json Data file
+           
+            del data[i]
+
+            if data == [] or data == None:
+              file = middleMan("","")
+              # Write Json to a Json Data Fi
+              with open(file,"w") as f: 
+                f.write("")
+                f.close()
+            else:
+              middleMan("w",data)
+    
+             # Sucess Message
+            print('\n>> Done !  ')
+            # End Process
+            sys.exit()
+          elif ans == "n" or ans == "N":
+            print("\n>> Process Terminated...")
+          else:
+            print("\n>> error :  You did not enter a valid input, try again !")
+            sys.exit()
+        
+         
+    except Exception:
+      return
 
 def helpGuide():
   print(" >> Welcome to buck :) \n")
@@ -287,6 +365,7 @@ def helpGuide():
   print(" >> Run 'buck --list' or 'buck -l' to list all your buckets. \n")
   print(" >> Run 'buck --create' or 'buck -c' to create a new bucket. \n")
   print(" >> Run 'buck --add <name> ' or 'buck -a <name>' to add a new bucket from the cloud. \n")
+  print(" >> Run 'buck --delete <name> ' or 'buck -d <name>' to delete a bucket . \n")
   print(" >> Run 'buck --erase' or 'buck -e' to clear all your buckets. \n")
   print(" >> Run 'buck --help' or 'buck -h' for help. \n")
   print(" >> Happy hacking, chief :) \n")
@@ -294,7 +373,7 @@ def helpGuide():
 # Main Function
 def main(arg=sys.argv):
   
-  args = ['--create','-c','--list','-l','--erase','-e','--help','-h','--add','-a']
+  args = ['--create','-c','--list','-l','--erase','-e','--help','-h','--add','-a','-d','--delete']
   if len(arg) == 1:
     print (""" >> Hello, chief :) \n """)
     print(" >> Run 'buck --help' for help \n")
@@ -316,15 +395,12 @@ def main(arg=sys.argv):
     
     helpGuide()
 
+  elif arg[1] == '--delete' or arg[1]=='-d':
+    deleteBucket(arg)
+
   elif arg[1] == '--add' or arg[1]=='-a':
     addBucket(arg)
 
   elif arg[1] not in args:
     run(arg)
  
-  
-
-   
-#if '__name__' == '__main__':
-  
-  

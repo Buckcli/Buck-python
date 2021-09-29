@@ -1,0 +1,28 @@
+{
+  "name": "buck",
+  "version": "1.0.0",
+  "description": "Run multiple commands with just one.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pleasant-tech/buck"
+  },
+  "keywords": [
+    "terminal",
+    "cli",
+    "cmd",
+    "buck",
+    "shell",
+    "command",
+    "pleasanttech"
+  ],
+  "author": "Pleasant Tech",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pleasant-tech/buck/issues"
+  },
+  "homepage": "https://github.com/pleasant-tech/buck#readme"
+}
