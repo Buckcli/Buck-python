@@ -129,30 +129,30 @@ def listBucket(arg):
   
     # fetch data from middleMan()
     data = middleMan("r","")
-
-    if data[-4] == ",":
-      print(data)
-      data = data[:-4]
-    else:
-      data = data[:-3]
-  
-    otherData = '{ "bucket" : [' + data + ' ] } '
-
-    data = json.loads(otherData)
-    data = data['bucket']
-    
-    # Logic
-    for i in data:
-  
-      response = i.get('name')
-
-    if arg[2] in response:
-      if i:
-        print (' >> Here you go : \n')
-        print(json.dumps(i,indent=2))
+    if data :
+      if data[-4] == ",":
+        data = data[:-4]
       else:
-        print(">> no data")
+        data = data[:-3]
+    
+      otherData = '{ "bucket" : [' + data + ' ] } '
 
+      data = json.loads(otherData)
+      data = data['bucket']
+      
+      # Logic
+      for i in data:
+    
+        response = i.get('name')
+
+      if arg[2] in response:
+        if i:
+          print (' >> Here you go : \n')
+          print(json.dumps(i,indent=2))
+        else:
+          print(">> no data")
+    else:
+      print(">> no data")
   else:
     # fetch data from middleMan()
     data = middleMan("r","")

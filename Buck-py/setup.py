@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup (
   name = 'buck',
-  version = '2.0.2',
+  version = '2.3.0',
   description = ' Get started with your projects faster .',
   url = 'https://github.com/Pleasant-tech/Buck/',
   keywords='productivity, setuptools, bucket, cli, buck, getbuck',
@@ -12,9 +12,9 @@ setup (
   packages = find_packages(),
   include_package_data = True,
   install_requires=[
-    'firebase-admin',
-  ],
- 
+    'firebase-admin',],
+
+   
  
   license="MIT",
   classifiers =[
