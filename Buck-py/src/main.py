@@ -8,10 +8,12 @@ import importlib.resources
 import firebase_admin
 from firebase_admin import credentials,firestore
 
+
 with importlib.resources.path("src","serviceAccountKey.json") as fire_resource:
   cred = credentials.Certificate(fire_resource)
   firebase_admin.initialize_app(cred)
 
+# Checks / Creates a local data.json file to store buckets.
 with importlib.resources.path("src","main.py") as haar_resource:
     
   file = os.path.abspath(haar_resource)
@@ -39,6 +41,7 @@ class Bucket:
 
 
 # Interacts with local db
+
 def middleMan(arg,data): 
   try :
     #Fetches data from data file 
