@@ -1,1 +1,1 @@
-include serviceAccountKey/*.json
+include src/*.json
