@@ -84,5 +84,5 @@ https://pypi.org/project/buck/
 
 Reach out to me :
 https://YouTube.com/c/Pleasanttech/
-https://Twitter.com/Pleasanttech01
+https://Twitter.com/Pleasantech_
 
