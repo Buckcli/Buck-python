@@ -5,13 +5,6 @@ import shlex
 import pprint
 import importlib.resources
 
-import firebase_admin
-from firebase_admin import credentials,firestore
-
-
-with importlib.resources.path("src","serviceAccountKey.json") as fire_resource:
-  cred = credentials.Certificate(fire_resource)
-  firebase_admin.initialize_app(cred)
 
 # Checks / Creates a local data.json file to store buckets.
 with importlib.resources.path("src","main.py") as haar_resource:
@@ -263,55 +256,6 @@ def eraseBucket():
     print("\n>> error :  You did not enter a valid input, try again !")
     sys.exit()
 
-#Add bucket from cloud
-def addBucket(arg):
-  print("\n >> Searching for " + arg[2] + " ...\n")
-  try :
-    exe = arg[2]
-    db = firestore.client()
-    collection = db.collection('buckets')
-    doc = collection.document(exe)
-    res = doc.get().to_dict()
-    
-
-    if res is not None:
-      print(' >> Fetching ' + arg[2] + " ...\n" )
-      name = res.get("name")
-      executor = res.get('executor')
-      commandList = res.get('commands')
-      description = res.get('description')
-      newData = {
-        "name": name,
-        "executor":executor,
-        "buck_list":commandList,
-        "description":description
-      }
-      
-      middleMan("a",newData)
-
-      print(' >> yay! it is done ')
-      score = 0
-      for i in commandList:
-       
-        if "$"  in i :
-          score += 10000
-        if "$" not in i :
-          score -= 10
-        if score > 1000:
-          print (f"\n >> Usage : 'buck {executor} [extra argument]' ")
-          break
-        elif score < 1000:
-          print (f"\n >> Usage : 'buck {executor}' ")
- 
-    elif res == None:
-      print(" >> No bucket - " + arg[2] + " :(")
-
-    # End Process
-    sys.exit()
-
-  except Exception as e:
-    print(" >> Oops! :( An error occured")
-
 # deletes a bucket 
 def deleteBucket(arg):
   if len(arg) > 2:
@@ -402,8 +346,6 @@ def main(arg=sys.argv):
   elif arg[1] == '--delete' or arg[1]=='-d':
     deleteBucket(arg)
 
-  elif arg[1] == '--add' or arg[1]=='-a':
-    addBucket(arg)
 
   elif arg[1] not in args:
     run(arg)
