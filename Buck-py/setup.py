@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup (
   name = 'buck',
-  version = '2.4.0',
+  version = '3.0',
   description = ' Get started with your projects faster .',
   url = 'https://github.com/Pleasant-tech/Buck/',
   keywords='productivity, setuptools, bucket, cli, buck, getbuck',
